@@ -20,6 +20,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var swipeLeftIcon: UIImageView!
     @IBOutlet weak var swipeRightIcon: UIImageView!
+    @IBOutlet weak var mainInboxView: UIView!
+    @IBOutlet var regularPanGestureRecognizer: UIPanGestureRecognizer!
+    var startingMainInboxViewCenter: CGPoint!
  
 
 
@@ -28,8 +31,12 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+
         self.view.bringSubviewToFront(emailsImage)
-        
+        var edgeGesture = UIScreenEdgePanGestureRecognizer(target: self, action: "edgeDidPan:")
+        edgeGesture.edges = UIRectEdge.Left
+        mainInboxView.addGestureRecognizer(edgeGesture)
+        mainInboxView.removeGestureRecognizer(self.regularPanGestureRecognizer)
         // Do any additional setup after loading the view, typically from a nib.
     }
     
@@ -186,7 +193,71 @@ class ViewController: UIViewController {
     
     }
     
+    @IBAction func edgeDidPan(sender: UIScreenEdgePanGestureRecognizer) {
+        var translation = sender.translationInView(view)
+        var location = sender.locationInView(view)
+        var threshold1 = self.mainInboxView.frame.size.width / 2.0
+        var threshold2 = threshold1 + 300
+        
+        if (sender.state == UIGestureRecognizerState.Began){
+            startingMainInboxViewCenter = mainInboxView.center
+        } else if (sender.state == UIGestureRecognizerState.Changed) {
+            var newX = startingMainInboxViewCenter.x + translation.x
+            if (newX > threshold1 && newX < threshold2) {
+                mainInboxView.center = CGPoint(x:  newX, y: mainInboxView.center.y)
+            } else if (newX < threshold1) {
+                mainInboxView.center = CGPoint(x: threshold1, y: mainInboxView.center.y)
+            } else if (newX > threshold2) {
+                mainInboxView.center = CGPoint(x: threshold2, y: mainInboxView.center.y)
+            }
 
+            
+        } else if (sender.state == UIGestureRecognizerState.Ended) {
+            self.mainInboxView .addGestureRecognizer(self.regularPanGestureRecognizer)
+            UIView.animateWithDuration(0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.3, options: nil, animations: { () -> Void in
+                if (self.mainInboxView.frame.origin.x < 100) {
+                    self.mainInboxView.frame.origin.x = 0
+                }
+                else {
+                    self.mainInboxView.frame.origin.x = threshold2 - threshold1
+                }
+            }, completion: nil)
+        }
+        
+    }
+
+    @IBAction func mainInboxViewDidPanBack(sender: UIPanGestureRecognizer) {
+        var translation = sender.translationInView(view)
+        var location = sender.locationInView(view)
+        
+        var threshold1 = self.mainInboxView.frame.size.width / 2.0
+        var threshold2 = threshold1 + 300
+        
+        if (sender.state == UIGestureRecognizerState.Began){
+            startingMainInboxViewCenter = mainInboxView.center
+        } else if (sender.state == UIGestureRecognizerState.Changed) {
+            var newX = startingMainInboxViewCenter.x + translation.x
+
+            if (newX > threshold1 && newX < threshold2) {
+                mainInboxView.center = CGPoint(x:newX, y: mainInboxView.center.y)
+            } else if (newX < threshold1) {
+                self.mainInboxView.removeGestureRecognizer(self.regularPanGestureRecognizer)
+                mainInboxView.center = CGPoint(x: threshold1, y: mainInboxView.center.y)
+            } else if (newX > threshold2) {
+                mainInboxView.center = CGPoint(x: threshold2, y: mainInboxView.center.y)
+            }
+            
+        } else if (sender.state == UIGestureRecognizerState.Ended) {
+            UIView.animateWithDuration(0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.3, options: nil, animations: { () -> Void in
+                    if (self.mainInboxView.frame.origin.x < 100) {
+                        self.mainInboxView.frame.origin.x = 0
+                    }
+                    else {
+                        self.mainInboxView.frame.origin.x = threshold2 - threshold1
+                    }
+                }, completion: nil)
+            }
+        }
 }
 
 
