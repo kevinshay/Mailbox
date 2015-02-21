@@ -14,9 +14,6 @@ Completion in ~ 6 hrs.
 <br>
 Optional story:
 Edge pan to reveal menu
-<br>
-If revealing, reveal.
-<br>
-If Hiding, hide
+
 
 ![mailbox - edgepan menu](https://cloud.githubusercontent.com/assets/6571805/6316472/ca9a97c2-b9dc-11e4-9ffe-632deb5c9f2b.gif)
